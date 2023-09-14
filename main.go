@@ -1,57 +1,29 @@
 package main
 
 import (
-	"bytes"
-	"crypto/sha256"
-	"fmt"
+	"os"
+
+	"github.com/hanio89/golang-blockchain/cli"
 )
 
-type BlockChain struct {
-	blocks []*Block
-}
-
-type Block struct {
-	Hash     []byte
-	Data     []byte
-	PrevHash []byte
-}
-
-func (b *Block) DeriveHash() {
-	info := bytes.Join([][]byte{b.Data, b.PrevHash}, []byte{})
-	hash := sha256.Sum256(info)
-	b.Hash = hash[:]
-}
-
-func CreateBlock(data string, prevHash []byte) *Block {
-	block := &Block{[]byte{}, []byte(data), prevHash}
-	block.DeriveHash()
-	return block
-}
-
-func (chain *BlockChain) AddBlock(data string) {
-	prevBlock := chain.blocks[len(chain.blocks)-1]
-	new := CreateBlock(data, prevBlock.Hash)
-	chain.blocks = append(chain.blocks, new)
-}
-
-func Genesis() *Block {
-	return CreateBlock("Genesis", []byte{})
-}
-
-func InitBlockChain() *BlockChain {
-	return &BlockChain{[]*Block{Genesis()}}
-}
-
 func main() {
-	chain := InitBlockChain()
+	defer os.Exit(0)
 
-	chain.AddBlock("First Block after Genesis")
-	chain.AddBlock("Second Block after Genesis")
-	chain.AddBlock("Third Block after Genesis")
+	cmd := cli.CommandLine{}
+	cmd.Run()
 
-	for _, block := range chain.blocks {
-		fmt.Printf("Previous Hash: %x\n", block.PrevHash)
-		fmt.Printf("Data in Block: %s\n", block.Data)
-		fmt.Printf("Hash: %x\n", block.Hash)
-	}
+	// http.HandleFunc("/run-command", func(w http.ResponseWriter, r *http.Request) {
+	// 	// Đọc lệnh từ yêu cầu POST
+	// 	// Thực hiện lệnh và trả về kết quả
+	// 	command := r.FormValue("command")
+	// 	cmd := exec.Command("cmd", "/c", command)
+	// 	output, err := cmd.CombinedOutput()
+	// 	if err != nil {
+	// 		http.Error(w, err.Error(), http.StatusInternalServerError)
+	// 		return
+	// 	}
+	// 	w.Write(output)
+	// })
+
+	// http.ListenAndServe(":3000", nil)
 }
