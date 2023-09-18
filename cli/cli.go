@@ -34,12 +34,43 @@ func (cli *CommandLine) validateArgs() {
 	}
 }
 
+// func (cli *CommandLine) StartNode(nodeID, minerAddress string) {
+// 	fmt.Printf("Starting Node %s\n", nodeID)
+
+//		if len(minerAddress) > 0 {
+//			if wallet.ValidateAddress(minerAddress) {
+//				fmt.Println("Mining is on. Address to receive rewards: ", minerAddress)
+//			} else {
+//				log.Panic("Wrong miner address!")
+//			}
+//		}
+//		network.StartServer(nodeID, minerAddress)
+//	}
 func (cli *CommandLine) StartNode(nodeID, minerAddress string) {
 	fmt.Printf("Starting Node %s\n", nodeID)
 
 	if len(minerAddress) > 0 {
 		if wallet.ValidateAddress(minerAddress) {
-			fmt.Println("Mining is on. Address to receive rewards: ", minerAddress)
+			// Kiểm tra số dư của ví
+			chain := blockchain.ContinueBlockChain(nodeID)
+			UTXOSet := blockchain.UTXOSet{chain}
+			defer chain.Database.Close()
+
+			balance := 0
+			pubKeyHash := wallet.Base58Decode([]byte(minerAddress))
+			pubKeyHash = pubKeyHash[1 : len(pubKeyHash)-4]
+			UTXOs := UTXOSet.FindUnspentTransactions(pubKeyHash)
+
+			for _, out := range UTXOs {
+				balance += out.Value
+			}
+
+			if balance >= 10 {
+				fmt.Println("Mining is on. Address to receive rewards: ", minerAddress)
+			} else {
+				fmt.Println("Not enough balance to start mining. Minimum balance required: 10")
+				return
+			}
 		} else {
 			log.Panic("Wrong miner address!")
 		}
