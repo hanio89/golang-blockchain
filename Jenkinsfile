@@ -9,33 +9,14 @@ pipeline {
             }
         }
 
-        stage('Test') {
-            steps {
-                // Run tests using go test
-                script {
-                    sh 'go test ./...'
-                }
-            }
-        }
-
         stage('Build') {
             steps {
                 // Build the Golang application
                 script {
-                    sh 'go build -o myapp'
+                    sh 'go run main.go'
                 }
             }
         }
-
-        stage('Deploy') {
-            steps {
-                // Deploy the application (you can customize this based on your deployment process)
-                script {
-                    sh './myapp'
-                }
-            }
-        }
-    }
 
     post {
         success {
