@@ -13,10 +13,13 @@ pipeline {
             steps {
                 // Build the Golang application
                 script {
+                    // Build the Golang application
                     sh 'go run main.go'
                 }
             }
         }
+
+    }
 
     post {
         success {
